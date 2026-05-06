@@ -296,3 +296,9 @@ Possible future enhancements include:
 HVTM CARE demonstrates how artificial intelligence can support pharmaceutical inventory forecasting, drug demand prediction, and shortage risk reduction.
 
 The project highlights the practical use of machine learning, deep learning, and ensemble forecasting techniques in healthcare-related inventory management.
+
+---
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
