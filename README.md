@@ -155,6 +155,31 @@ Inventory Forecasting and Shortage Risk Support
 
 ---
 
+## Repository Structure
+
+```text
+hvtm-care-pharma-forecasting/
+├── backend/
+│   ├── app.py                # FastAPI prediction & data API
+│   ├── config.py             # Path configuration & environment settings
+│   └── engine_logic.py       # NeuroStack prediction & model orchestration
+├── data/
+│   ├── drugs.csv             # Primary pharmaceutical inventory dataset
+│   └── drugs_featured.csv    # Feature-engineered dataset
+├── frontend/
+│   ├── css/                  # UI stylesheet & styling
+│   ├── js/                   # UI handlers, state & API client
+│   └── index.html            # Unified inventory web dashboard
+├── models/                   # Serialized ML & DL model binaries (.pkl, .h5, .npy)
+├── notebooks/                # Jupyter research, training & evaluation notebooks
+├── scripts/                  # Utility scripts (brand check, date fixes)
+├── requirements.txt          # Python dependencies
+├── README.md                 # Project documentation
+└── LICENSE                   # MIT License
+```
+
+---
+
 ## Installation and Setup
 
 ### 1. Clone the Repository
@@ -235,8 +260,8 @@ The dataset supports the development of demand prediction models by capturing in
 
 Main dataset files:
 
-- `drugs.csv`
-- `drugs_featured.csv`
+- `data/drugs.csv`
+- `data/drugs_featured.csv`
 
 ---
 

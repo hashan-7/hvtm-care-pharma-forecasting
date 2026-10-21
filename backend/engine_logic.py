@@ -1,27 +1,37 @@
-import pandas as pd
-import numpy as np
-import joblib
-from datetime import datetime
-import calendar
-from tensorflow.keras.models import load_model # type: ignore
-from config import MODEL_PATHS, DATA_FILE_PATH
 import os
+import calendar
+from datetime import datetime
+import joblib
+import numpy as np
+import pandas as pd
+from tensorflow.keras.models import load_model  # type: ignore
+from config import MODEL_PATHS, DATA_FILE_PATH
 
 models = {}
 scalers = {}
 
-
+# Brand to encoded product group mapping (supports both generic names and specific brand names)
 BRAND_MAP = {
-    'Metformin (500mg)': 0, 'Glilcomet': 0, 'Metfogen-XR': 0, 'Glucopet-XR': 0,
-    'Gliclazide (80mg)': 1, 'Diamicron-MR': 1, 'Glycinorm': 1, 'Diatica': 1,
-    'Sitagliptin (50mg)': 2, 'Sita': 2, 'Sitavic': 2, 'Nsit': 2,
-    'Pioglitazone (30mg)': 3, 'Pioz': 3, 'Glustin': 3, 'Actos': 3,
-    'Atorvastatin (20mg)': 4, 'Atova': 4, 'Lipitor': 4, 'Atovic': 4,
-    'Losartan (50mg)': 5, 'Losacar': 5, 'Zaart': 5, 'Repace': 5,
-    'Amlodipine (5mg)': 6, 'Amlong': 6, 'Amlopress': 6, 'Amlodac': 6,
-    'Bisoprolol (5mg)': 7, 'Concor': 7, 'Bisovic': 7, 'Monocor': 7,
-    'Thyroxine (100mcg)': 8, 'Euthyrox': 8, 'Thyronom': 8, 'TH (Levothyroxime)': 8,
-    'Enalapril (5mg)': 9, 'Enam': 9, 'Envas': 9, 'Innovace': 9
+    # Metformin group (0)
+    'Metformin (500mg)': 0, 'Metformin': 0, 'Glilcomet': 0, 'Metfogen-XR': 0, 'Glucopet-XR': 0,
+    # Gliclazide group (1)
+    'Gliclazide (80mg)': 1, 'Gliclazide': 1, 'Diamicron-MR': 1, 'Glycinorm': 1, 'Diatica': 1,
+    # Sitagliptin group (2)
+    'Sitagliptin (50mg)': 2, 'Sitagliptin': 2, 'Sita': 2, 'Sitavic': 2, 'Nsit': 2,
+    # Pioglitazone group (3)
+    'Pioglitazone (30mg)': 3, 'Pioglitazone': 3, 'Pioz': 3, 'Glustin': 3, 'Actos': 3,
+    # Atorvastatin group (4)
+    'Atorvastatin (20mg)': 4, 'Atorvastatin': 4, 'Atova': 4, 'Lipitor': 4, 'Atovic': 4,
+    # Losartan group (5)
+    'Losartan (50mg)': 5, 'Losartan': 5, 'Losacar': 5, 'Zaart': 5, 'Repace': 5,
+    # Amlodipine group (6)
+    'Amlodipine (5mg)': 6, 'Amlodipine': 6, 'Amlong': 6, 'Amlopress': 6, 'Amlodac': 6,
+    # Bisoprolol group (7)
+    'Bisoprolol (5mg)': 7, 'Bisoprolol': 7, 'Concor': 7, 'Bisovic': 7, 'Monocor': 7,
+    # Thyroxine group (8)
+    'Thyroxine (100mcg)': 8, 'Thyroxine': 8, 'Euthyrox': 8, 'Thyronom': 8, 'TH (Levothyroxime)': 8,
+    # Enalapril group (9)
+    'Enalapril (5mg)': 9, 'Enalapril': 9, 'Enam': 9, 'Envas': 9, 'Innovace': 9
 }
 
 def load_resources():
@@ -34,15 +44,14 @@ def load_resources():
         models['lstm'] = load_model(MODEL_PATHS['lstm'], compile=False)
         models['gru'] = load_model(MODEL_PATHS['gru'], compile=False)
         models['neurostack'] = joblib.load(MODEL_PATHS['neurostack'])
-        print("System Ready: All Models & NeuroStack Loaded.")
+        print("[SUCCESS] System Ready: All Models & NeuroStack Loaded.")
     except Exception as e:
-        print(f"CRITICAL ERROR Loading Resources: {e}")
-
-
+        print(f"[CRITICAL ERROR] Loading Resources: {e}")
 
 def get_lag_12_demand(brand_name, target_month, target_year):
     try:
-        if not os.path.exists(DATA_FILE_PATH): return 0.0
+        if not os.path.exists(DATA_FILE_PATH):
+            return 0.0
         df = pd.read_csv(DATA_FILE_PATH)
         df['Date'] = pd.to_datetime(df['Date'])
         lag_year = target_year - 1
@@ -56,24 +65,24 @@ def get_lag_12_demand(brand_name, target_month, target_year):
         
         if not record.empty:
             val = float(record.iloc[0]['Issued_Qty'])
-            print(f"✅ FOUND: {brand_name} Lag-12 is {val}")
+            print(f"[FOUND] {brand_name} Lag-12 is {val}")
             return val
         
-
         avg = df[df['Brand_Clean'] == search_brand]['Issued_Qty'].mean()
         if pd.notna(avg):
-            print(f"⚠️ INFO: Using brand average for {brand_name}: {avg}")
+            print(f"[INFO] Using brand average for {brand_name}: {avg}")
             return float(avg)
             
-        print(f"DEBUG: No historical data found for {brand_name}")
+        print(f"[DEBUG] No historical data found for {brand_name}")
         return 0.0
     except Exception as e:
-        print(f"Error in get_lag_12_demand: {e}")
+        print(f"[ERROR] in get_lag_12_demand: {e}")
         return 0.0
 
 def get_recent_actual(brand_name):
     try:
-        if not os.path.exists(DATA_FILE_PATH): return 0.0
+        if not os.path.exists(DATA_FILE_PATH):
+            return 0.0
         df = pd.read_csv(DATA_FILE_PATH)
         
         df['Brand_Clean'] = df['Brand_Name'].astype(str).str.strip().str.lower()
@@ -87,22 +96,28 @@ def get_recent_actual(brand_name):
             return float(val) if pd.notna(val) else 0.0
         return 0.0
     except Exception as e:
-        print(f"Error in get_recent_actual: {e}")
+        print(f"[ERROR] in get_recent_actual: {e}")
         return 0.0
-
 
 def prepare_input_features(brand_code, month, year, usd_rate, lag_12, recent_actual):
     expected_features = scalers['X'].feature_names_in_
     input_data = {feat: 0.0 for feat in expected_features}
     
     for feat in expected_features:
-        if 'Brand' in feat: input_data[feat] = float(brand_code)
-        elif 'Year' in feat: input_data[feat] = float(year)
-        elif 'Month_Sin' in feat: input_data[feat] = np.sin(2 * np.pi * month / 12)
-        elif 'Month_Cos' in feat: input_data[feat] = np.cos(2 * np.pi * month / 12)
-        elif 'Month' in feat: input_data[feat] = float(month)
-        elif 'USD' in feat: input_data[feat] = float(usd_rate)
-        elif 'Lag_12' in feat: input_data[feat] = float(lag_12)
+        if 'Brand' in feat:
+            input_data[feat] = float(brand_code)
+        elif 'Year' in feat:
+            input_data[feat] = float(year)
+        elif 'Month_Sin' in feat:
+            input_data[feat] = np.sin(2 * np.pi * month / 12)
+        elif 'Month_Cos' in feat:
+            input_data[feat] = np.cos(2 * np.pi * month / 12)
+        elif 'Month' in feat:
+            input_data[feat] = float(month)
+        elif 'USD' in feat:
+            input_data[feat] = float(usd_rate)
+        elif 'Lag_12' in feat:
+            input_data[feat] = float(lag_12)
         elif any(x in feat for x in ['Lag', 'Rolling', 'Mean']):
             input_data[feat] = float(recent_actual)
             
@@ -110,7 +125,6 @@ def prepare_input_features(brand_code, month, year, usd_rate, lag_12, recent_act
 
 def get_single_month_prediction(brand_code, month, year, usd_rate, lag_12, recent_actual):
     input_df = prepare_input_features(brand_code, month, year, usd_rate, lag_12, recent_actual)
-
     input_df = input_df.fillna(0.0)
     input_scaled = scalers['X'].transform(input_df)
     
@@ -128,12 +142,12 @@ def get_single_month_prediction(brand_code, month, year, usd_rate, lag_12, recen
     })
     
     final_scaled = models['neurostack'].predict(stack_input).reshape(-1, 1)
-    
     real_value = np.expm1(scalers['y'].inverse_transform(final_scaled)[0][0])
     return max(0, real_value)
 
 def run_prediction(brand_name, current_stock, usd_rate):
-    brand_code = BRAND_MAP.get(brand_name.strip(), -1)
+    clean_brand = brand_name.strip()
+    brand_code = BRAND_MAP.get(clean_brand, -1)
     if brand_code == -1: 
         return {"error": f"Brand '{brand_name}' is not in the 30-product profile."}
     
@@ -141,8 +155,8 @@ def run_prediction(brand_name, current_stock, usd_rate):
     next_month = (today.month % 12) + 1
     next_year = today.year + (1 if today.month == 12 else 0)
 
-    lag_12_next = get_lag_12_demand(brand_name, next_month, next_year)
-    recent_actual = get_recent_actual(brand_name)
+    lag_12_next = get_lag_12_demand(clean_brand, next_month, next_year)
+    recent_actual = get_recent_actual(clean_brand)
 
     final_prediction = get_single_month_prediction(
         brand_code, next_month, next_year, usd_rate, lag_12_next, recent_actual
@@ -152,8 +166,8 @@ def run_prediction(brand_name, current_stock, usd_rate):
     period_str = f"{next_year}-{next_month:02d}-01 to {next_year}-{next_month:02d}-{days_in_next}"
 
     return {
-        "brand_name": brand_name,
+        "brand_name": clean_brand,
         "prediction_period": period_str,
-        "predicted_demand": round(final_prediction, 2),
+        "predicted_demand": round(float(final_prediction), 2),
         "applied_learning_weight": "NeuroStack Hybrid Optimized"
     }
