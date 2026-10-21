@@ -3,7 +3,11 @@ import os
 BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(BACKEND_DIR)
 
-DATA_FILE_PATH = os.path.join(PROJECT_ROOT, "drugs.csv")
+DATA_DIR = os.path.join(PROJECT_ROOT, "data")
+DATA_FILE_PATH = os.path.join(DATA_DIR, "drugs.csv")
+if not os.path.exists(DATA_FILE_PATH):
+    DATA_FILE_PATH = os.path.join(PROJECT_ROOT, "drugs.csv")
+
 MODEL_DIR = os.path.join(PROJECT_ROOT, "models")
 
 MODEL_PATHS = {
@@ -14,7 +18,5 @@ MODEL_PATHS = {
     "xgb": os.path.join(MODEL_DIR, "xgboost_model.pkl"),
     "lstm": os.path.join(MODEL_DIR, "BiLSTM_model.h5"),
     "gru": os.path.join(MODEL_DIR, "GRU_model.h5"),
-    
-
     "neurostack": os.path.join(MODEL_DIR, "NeuroStack_MetaLearner.pkl")
 }
