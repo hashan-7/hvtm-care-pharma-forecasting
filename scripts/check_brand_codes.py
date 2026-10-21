@@ -1,13 +1,20 @@
+import os
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 
-file_path = 'drugs.csv' 
-df = pd.read_csv(file_path)
+# Resolve project data path dynamically
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+DATA_FILE_PATH = os.path.join(PROJECT_ROOT, "data", "drugs.csv")
+if not os.path.exists(DATA_FILE_PATH):
+    DATA_FILE_PATH = os.path.join(PROJECT_ROOT, "drugs.csv")
+
+df = pd.read_csv(DATA_FILE_PATH)
 
 le = LabelEncoder()
 le.fit(df['Brand_Name'])
 
-print("\n📋 BRAND CODE REFERENCE LIST")
+print("\nBRAND CODE REFERENCE LIST")
 print("=" * 40)
 print(f"{'CODE':<5} | {'BRAND NAME'}")
 print("-" * 40)

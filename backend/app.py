@@ -1,13 +1,13 @@
-from fastapi import FastAPI, HTTPException # type: ignore
-from fastapi.middleware.cors import CORSMiddleware # type: ignore
-from pydantic import BaseModel # type: ignore
-from engine_logic import load_resources, run_prediction
-from config import DATA_FILE_PATH
-import pandas as pd
-from datetime import datetime
 import os
 import math
 import calendar
+from datetime import datetime
+import pandas as pd
+from fastapi import FastAPI, HTTPException  # type: ignore
+from fastapi.middleware.cors import CORSMiddleware  # type: ignore
+from pydantic import BaseModel  # type: ignore
+from engine_logic import load_resources, run_prediction
+from config import DATA_FILE_PATH
 
 app = FastAPI(
     title="HVTM Care AI Backend",
@@ -59,7 +59,7 @@ class DataEntryInput(BaseModel):
     received_qty: float = 0.0 
     usd_rate: float
 
-def check_duplicate_and_lock(brand, year, month):
+def check_duplicate_and_lock(brand: str, year: int, month: int):
     try:
         input_date = datetime(year, month, 1)
         current_date = datetime.now()
@@ -72,21 +72,24 @@ def check_duplicate_and_lock(brand, year, month):
         try:
             df = pd.read_csv(DATA_FILE_PATH)
             date_str = f"{year}-{month:02d}-01"
-            existing = df[(df['Brand_Name'] == brand) & (df['Date'] == date_str)]
+            clean_brand = str(brand).strip().lower()
+            existing = df[(df['Brand_Name'].astype(str).str.strip().str.lower() == clean_brand) & (df['Date'] == date_str)]
             if not existing.empty:
                 return False, f"Data for {brand} in {year}-{month:02d} already exists. Please edit or delete it."
         except Exception as e:
             return False, str(e)
     return True, ""
 
-def get_previous_stock_data(brand_name):
+def get_previous_stock_data(brand_name: str):
     opening_stock = 0.0
     lead_time = 14.0 
     if os.path.isfile(DATA_FILE_PATH):
         try:
             df = pd.read_csv(DATA_FILE_PATH)
-            brand_df = df[df['Brand_Name'] == brand_name]
+            clean_brand = str(brand_name).strip().lower()
+            brand_df = df[df['Brand_Name'].astype(str).str.strip().str.lower() == clean_brand]
             if not brand_df.empty:
+                brand_df = brand_df.copy()
                 brand_df['Date'] = pd.to_datetime(brand_df['Date'])
                 brand_df = brand_df.sort_values(by='Date')
                 last_record = brand_df.iloc[-1]
@@ -94,7 +97,7 @@ def get_previous_stock_data(brand_name):
                 
                 old_lead = float(last_record['Lead_Time'])
                 lead_time = old_lead if old_lead > 0 else 14.0
-        except:
+        except Exception:
             pass 
     return opening_stock, lead_time
 
@@ -105,8 +108,9 @@ def get_logs():
     try:
         df = pd.read_csv(DATA_FILE_PATH)
         df = df.dropna(subset=['Date', 'Brand_Name'])
+        df = df.fillna('')
         return df.sort_values(by='Date', ascending=False).head(50).to_dict(orient='records')
-    except:
+    except Exception:
         return []
 
 @app.post("/predict")
@@ -118,7 +122,7 @@ def predict_endpoint(data: PredictionInput):
 
     raw_demand = float(raw_result.get('predicted_demand', 0))
     period_str = raw_result.get('prediction_period', "---")
-    learning_status = raw_result.get('status', "NeuroStack Engine Active") 
+    learning_status = raw_result.get('applied_learning_weight', raw_result.get('status', "NeuroStack Engine Active"))
  
     stable_demand = math.ceil(raw_demand)
 
@@ -177,7 +181,7 @@ def add_data(data: DataEntryInput):
             
             if stable_demand > issued:
                 shortage_flag = 1
-        except:
+        except Exception:
             shortage_flag = 0 
 
         new_row = {
@@ -213,7 +217,8 @@ def delete_data(brand_name: str, date: str):
         if not os.path.isfile(DATA_FILE_PATH):
             raise HTTPException(status_code=404, detail="Dataset not found")
         df = pd.read_csv(DATA_FILE_PATH)
-        df = df[~((df['Brand_Name'] == brand_name) & (df['Date'] == date))]
+        clean_brand = str(brand_name).strip().lower()
+        df = df[~((df['Brand_Name'].astype(str).str.strip().str.lower() == clean_brand) & (df['Date'] == date))]
         df.to_csv(DATA_FILE_PATH, index=False)
         return {"status": "success"}
     except Exception as e:
