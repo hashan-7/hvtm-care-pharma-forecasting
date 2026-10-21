@@ -1,0 +1,24 @@
+# HVTM CARE - Pharmaceutical Inventory Forecasting System
+# Core Dependencies
+
+# Web API Backend
+fastapi>=0.115.0
+uvicorn>=0.30.0
+pydantic>=2.8.0
+python-multipart>=0.0.9
+
+# Data Processing & Numerical Computation
+pandas>=2.2.0
+numpy>=2.0.0
+
+# Machine Learning, Ensembles & Deep Learning
+scikit-learn>=1.5.0
+tensorflow>=2.16.0
+xgboost>=2.1.0
+joblib>=1.4.0
+
+# Visualization & Exploration Notebooks
+matplotlib>=3.9.0
+seaborn>=0.13.0
+jupyter>=1.0.0
+ipykernel>=6.29.0
