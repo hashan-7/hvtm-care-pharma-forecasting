@@ -1,3 +1,9 @@
+"""
+HVTM CARE - Pharmaceutical Inventory AI Backend Service
+Author: Maheema Vihangi (@MaheemaVihangi)
+Module: FastAPI REST Microservice & Predictive Engine Orchestration
+"""
+
 import os
 import math
 import calendar
