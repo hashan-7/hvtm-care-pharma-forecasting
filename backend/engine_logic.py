@@ -1,3 +1,9 @@
+"""
+HVTM CARE - Pharmaceutical Inventory Predictive Engine
+Author: Hashan Chamira (@hashan-7)
+Module: NeuroStack Meta-Learner, BiLSTM Serving & Inference Orchestration
+"""
+
 import os
 import sys
 import calendar
