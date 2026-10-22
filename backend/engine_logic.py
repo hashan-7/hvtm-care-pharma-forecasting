@@ -1,4 +1,5 @@
 import os
+import sys
 import calendar
 from datetime import datetime
 import joblib
@@ -36,6 +37,18 @@ BRAND_MAP = {
 
 def load_resources():
     try:
+        # Auto-download models from GitHub Release if missing locally
+        if not os.path.exists(MODEL_PATHS.get('scaler_X', '')):
+            scripts_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "scripts")
+            if scripts_dir not in sys.path:
+                sys.path.append(scripts_dir)
+            try:
+                from download_models import download_models
+                print("[INFO] Model weights not found locally. Fetching from GitHub Release v4.1.0...")
+                download_models()
+            except Exception as dl_err:
+                print(f"[WARNING] Auto-download attempt failed: {dl_err}")
+
         scalers['X'] = joblib.load(MODEL_PATHS['scaler_X'])
         scalers['y'] = joblib.load(MODEL_PATHS['scaler_y'])
         models['lr'] = joblib.load(MODEL_PATHS['lr'])

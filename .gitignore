@@ -54,3 +54,9 @@ logs/
 *.zip
 *.rar
 *.7z
+
+# Serialized ML & DL model binaries (hosted on GitHub Release v4.1.0)
+models/*.pkl
+models/*.h5
+models/*.npy
+models/*.png
