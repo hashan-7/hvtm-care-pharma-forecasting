@@ -1,3 +1,9 @@
+/**
+ * HVTM CARE - Web Dashboard UI Handlers & Client Controllers
+ * Author: Maheema Vihangi (@MaheemaVihangi)
+ * Module: Web Dashboard Frontend & Dynamic Interaction Layer
+ */
+
 const DRUG_BRAND_MAP = {
     "Metformin": ["Metfogen-XR", "Glilcomet", "Glucopet-XR"],
     "Gliclazide": ["Diamicron-MR", "Diatica", "Glycinorm"],
