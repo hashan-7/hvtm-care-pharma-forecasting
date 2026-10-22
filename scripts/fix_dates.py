@@ -1,3 +1,9 @@
+"""
+HVTM CARE - Data Preprocessing & Date Normalization Utility
+Author: Thiloka Indhuwari (@ThilokaIndhuwari)
+Module: Temporal Alignment & Dataset Chronological Formatting
+"""
+
 import os
 import pandas as pd
 

@@ -1,3 +1,9 @@
+"""
+HVTM CARE - Pharmaceutical Entity & Brand Encoding Diagnostic Utility
+Author: Thiloka Indhuwari (@ThilokaIndhuwari)
+Module: Categorical Preprocessing & Label Encoding Verification
+"""
+
 import os
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
